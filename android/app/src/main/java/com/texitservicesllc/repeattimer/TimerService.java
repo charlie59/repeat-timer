@@ -46,7 +46,7 @@ public class TimerService extends Service {
     private boolean repeat;
     private boolean sound = true;
     private boolean vibrate = true;
-    private String soundType = "chime";
+    private String soundType = "bowl";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable tick = this::onTick;
@@ -83,7 +83,7 @@ public class TimerService extends Service {
         sound = intent.getBooleanExtra("sound", true);
         vibrate = intent.getBooleanExtra("vibrate", true);
         String st = intent.getStringExtra("soundType");
-        soundType = st != null ? st : "chime";
+        soundType = st != null ? st : "bowl";
         phaseEnd = intent.getLongExtra("phaseEnd", System.currentTimeMillis() + durationMs);
         round = 1;
         state = "work";

@@ -88,12 +88,12 @@ function play(kind, force = false) {
   if (Native) { Native.playCue({ kind, soundType: settings.soundType }); return; }
   try {
     const c = audio();
-    (SOUNDS[settings.soundType] || SOUNDS.chime)[kind](c.currentTime + 0.02);
+    (SOUNDS[settings.soundType] || SOUNDS.bowl)[kind](c.currentTime + 0.02);
   } catch (e) {}
 }
 
 /* ---------- Settings ---------- */
-const DEFAULTS = { duration: 180, repeat: false, rest: 5, sound: true, soundType: 'chime', vibrate: true };
+const DEFAULTS = { duration: 180, repeat: false, rest: 5, sound: true, soundType: 'bowl', vibrate: true };
 let settings = { ...DEFAULTS };
 const save = () => store.save(settings);
 

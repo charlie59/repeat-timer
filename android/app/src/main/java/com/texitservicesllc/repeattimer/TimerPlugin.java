@@ -35,7 +35,7 @@ public class TimerPlugin extends Plugin {
         i.putExtra("repeat", call.getBoolean("repeat", false));
         i.putExtra("sound", call.getBoolean("sound", true));
         i.putExtra("vibrate", call.getBoolean("vibrate", true));
-        i.putExtra("soundType", call.getString("soundType", "chime"));
+        i.putExtra("soundType", call.getString("soundType", "bowl"));
         ContextCompat.startForegroundService(getContext(), i);
         call.resolve();
     }
@@ -55,7 +55,7 @@ public class TimerPlugin extends Plugin {
                     call.getBoolean("repeat", false),
                     num(call, "restMs", 5000L),
                     call.getBoolean("sound", true),
-                    call.getString("soundType", "chime"),
+                    call.getString("soundType", "bowl"),
                     call.getBoolean("vibrate", true));
         }
         call.resolve();
@@ -68,7 +68,7 @@ public class TimerPlugin extends Plugin {
 
     @PluginMethod
     public void playCue(PluginCall call) {
-        Sounds.play(call.getString("soundType", "chime"), call.getString("kind", "end"));
+        Sounds.play(call.getString("soundType", "bowl"), call.getString("kind", "end"));
         call.resolve();
     }
 }

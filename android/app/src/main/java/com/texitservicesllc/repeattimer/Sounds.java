@@ -36,7 +36,7 @@ final class Sounds {
     static synchronized void play(String type, String kind) {
         if (pool == null) return;
         Integer id = ids.get(type + "_" + kind);
-        if (id == null) id = ids.get("chime_" + kind);
+        if (id == null) id = ids.get("bowl_" + kind);
         if (id != null) pool.play(id, 1f, 1f, 1, 0, 1f);
     }
 }

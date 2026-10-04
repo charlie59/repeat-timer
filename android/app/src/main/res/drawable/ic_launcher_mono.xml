@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:rotation="0" android:pivotX="54" android:pivotY="54"><path android:fillColor="#FF000000" android:pathData="M54,32 Q60.5,26.0 54,20 Q47.5,26.0 54,32 Z"/></group>
+    <group android:rotation="45" android:pivotX="54" android:pivotY="54"><path android:fillColor="#FF000000" android:pathData="M54,32 Q60.5,26.0 54,20 Q47.5,26.0 54,32 Z"/></group>
+    <group android:rotation="90" android:pivotX="54" android:pivotY="54"><path android:fillColor="#FF000000" android:pathData="M54,32 Q60.5,26.0 54,20 Q47.5,26.0 54,32 Z"/></group>
+    <group android:rotation="135" android:pivotX="54" android:pivotY="54"><path android:fillColor="#FF000000" android:pathData="M54,32 Q60.5,26.0 54,20 Q47.5,26.0 54,32 Z"/></group>
+    <group android:rotation="180" android:pivotX="54" android:pivotY="54"><path android:fillColor="#FF000000" android:pathData="M54,32 Q60.5,26.0 54,20 Q47.5,26.0 54,32 Z"/></group>
+    <group android:rotation="225" android:pivotX="54" android:pivotY="54"><path android:fillColor="#FF000000" android:pathData="M54,32 Q60.5,26.0 54,20 Q47.5,26.0 54,32 Z"/></group>
+    <group android:rotation="270" android:pivotX="54" android:pivotY="54"><path android:fillColor="#FF000000" android:pathData="M54,32 Q60.5,26.0 54,20 Q47.5,26.0 54,32 Z"/></group>
+    <group android:rotation="315" android:pivotX="54" android:pivotY="54"><path android:fillColor="#FF000000" android:pathData="M54,32 Q60.5,26.0 54,20 Q47.5,26.0 54,32 Z"/></group>
+    <group android:pivotX="54" android:pivotY="54" android:scaleX="0.64" android:scaleY="0.64" android:translateY="2.5"><path android:fillColor="#FF000000" android:pathData="M54,78 C36,66 26,56 26,45 C26,36 33,30 40.5,30 C46.5,30 51,33.5 54,38.5 C57,33.5 61.5,30 67.5,30 C75,30 82,36 82,45 C82,56 72,66 54,78 Z"/></group>
+</vector>
