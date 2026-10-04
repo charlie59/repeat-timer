@@ -83,8 +83,32 @@
       <button class="toggle" id="vibrateToggle" aria-pressed="true">ON</button>
     </div>
 
+    <div class="row">
+      <div class="rowLabel">Full version<br><small id="licenseText"></small></div>
+      <button class="toggle" id="licenseBtn" hidden>UNLOCK</button>
+    </div>
+
+    <div class="row" id="debugRow" hidden>
+      <div class="rowLabel">Debug <small>(dev builds only)</small></div>
+      <div class="debugBtns">
+        <button class="toggle" id="dbgExpire">EXPIRE</button>
+        <button class="toggle" id="dbgReset">RESET</button>
+      </div>
+    </div>
+
     <button class="done" data-close>DONE</button>
     <div class="credit">Repeat Timer 1.0<br>from TexIt Services LLC</div>
+  </section>
+
+  <!-- Unlock (shown when Repeat is tapped after the trial) -->
+  <section id="unlock" class="sheet" hidden>
+    <h2>Unlock Repeat</h2>
+    <p class="lead" id="unlockLead">Your 7-day free trial has ended.</p>
+    <p class="lead">Repeat — rounds that cycle automatically with a rest gap — is part of the full version. One payment, yours for good. The basic timer stays free.</p>
+    <button class="buy" id="buyBtn">UNLOCK</button>
+    <p class="msg" id="unlockMsg"></p>
+    <button class="linkBtn" id="restoreBtn">Restore purchase</button>
+    <button class="done" data-close>NOT NOW</button>
   </section>
 
   <script src="app.js"></script>

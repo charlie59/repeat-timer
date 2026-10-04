@@ -112,3 +112,12 @@ body.work #startBtn, body.rest #startBtn { background: var(--stop); }
 .segmented button { height: 60px; border-radius: 16px; background: var(--panel); font-size: 20px; font-weight: 700; color: var(--muted); }
 .segmented button[aria-pressed="true"] { background: var(--accent); color: #000; }
 .credit { text-align: center; color: var(--muted); font-size: 15px; line-height: 1.5; margin-top: -6px; flex-shrink: 0; }
+
+.lead { font-size: 20px; line-height: 1.45; color: var(--fg); margin: 0; }
+.buy { height: 96px; border-radius: 22px; background: var(--go); color: #fff; font-size: 30px; font-weight: 900; letter-spacing: .06em; flex-shrink: 0; }
+.buy:disabled { opacity: .5; }
+.linkBtn { color: var(--accent); font-size: 20px; font-weight: 600; padding: 8px; align-self: center; }
+.msg { min-height: 1.4em; text-align: center; color: var(--rest); font-size: 18px; margin: 0; }
+.debugBtns { display: flex; gap: 8px; }
+.debugBtns .toggle { width: 96px; font-size: 16px; }
+#licenseBtn { background: var(--go); color: #fff; }

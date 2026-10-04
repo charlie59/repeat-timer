@@ -16,8 +16,20 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Upload key lives outside the repo; credentials come from ~/.gradle/gradle.properties
+    signingConfigs {
+        release {
+            if (project.hasProperty('TEXIT_UPLOAD_STORE_FILE')) {
+                storeFile file(TEXIT_UPLOAD_STORE_FILE)
+                storePassword TEXIT_UPLOAD_STORE_PASSWORD
+                keyAlias TEXIT_UPLOAD_KEY_ALIAS
+                keyPassword TEXIT_UPLOAD_KEY_PASSWORD
+            }
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -34,6 +46,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation "androidx.core:core:$androidxCoreVersion"
+    implementation "com.android.billingclient:billing:9.1.0"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')

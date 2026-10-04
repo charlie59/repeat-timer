@@ -92,6 +92,50 @@ function play(kind, force = false) {
   } catch (e) {}
 }
 
+/* ---------- Trial + purchase ---------- */
+const Billing = P.Billing || null;
+const TRIAL_DAYS = 7;
+const DAY = 24 * 60 * 60 * 1000;
+let ent = { trialStart: 0, purchased: false, price: null };
+let devBuild = false;
+
+const entStore = {
+  async load() {
+    try {
+      const v = P.Preferences ? (await P.Preferences.get({ key: 'ent' })).value : localStorage.getItem('ent');
+      return v ? JSON.parse(v) : null;
+    } catch (e) { return null; }
+  },
+  async save() {
+    const v = JSON.stringify(ent);
+    try { P.Preferences ? await P.Preferences.set({ key: 'ent', value: v }) : localStorage.setItem('ent', v); } catch (e) {}
+  },
+};
+const trialDaysLeft = () => Math.max(0, Math.ceil((ent.trialStart + TRIAL_DAYS * DAY - Date.now()) / DAY));
+const unlocked = () => ent.purchased || trialDaysLeft() > 0;
+
+// Ask Play what this Google account owns. Offline / not-installed-from-Play keeps the cached answer.
+async function refreshLicense() {
+  if (!Billing) return;
+  try {
+    const st = await Billing.getStatus();
+    devBuild = !!st.debug;
+    if (st.price) ent.price = st.price;
+    if (st.known) ent.purchased = !!st.purchased;
+    await entStore.save();
+  } catch (e) {}
+  enforceLicense();
+}
+
+// Trial over and not purchased: Repeat switches off (only when the timer isn't running).
+function enforceLicense() {
+  if (!unlocked() && settings.repeat && !(state === 'work' || state === 'rest')) {
+    settings.repeat = false;
+    save();
+  }
+  render();
+}
+
 /* ---------- Settings ---------- */
 const DEFAULTS = { duration: 180, repeat: false, rest: 5, sound: true, soundType: 'bowl', vibrate: true };
 let settings = { ...DEFAULTS };
@@ -204,6 +248,12 @@ function renderSettings() {
   $('vibrateToggle').textContent = settings.vibrate ? 'ON' : 'OFF';
   document.querySelectorAll('#soundType button').forEach((b) =>
     b.setAttribute('aria-pressed', String(b.dataset.sound === settings.soundType)));
+  const left = trialDaysLeft();
+  $('licenseText').textContent = ent.purchased ? 'Unlocked — thank you!'
+    : left > 0 ? `Free trial · ${left} day${left === 1 ? '' : 's'} left`
+    : 'Trial ended — Repeat is locked';
+  $('licenseBtn').hidden = ent.purchased;
+  $('debugRow').hidden = !devBuild;
 }
 
 /* ---------- Sheets (Android back button closes them via history) ---------- */
@@ -225,12 +275,76 @@ function hideSheet(fromPop = false) {
 window.addEventListener('popstate', () => hideSheet(true));
 document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => hideSheet()));
 
+// Switch from one open sheet to another without touching history (back still closes it).
+function swapSheet(id) {
+  if (openSheet) openSheet.hidden = true;
+  openSheet = $(id);
+  openSheet.hidden = false;
+}
+
+function renderUnlock(msg = '') {
+  $('unlockLead').textContent = trialDaysLeft() > 0
+    ? `Free trial: ${trialDaysLeft()} day${trialDaysLeft() === 1 ? '' : 's'} left.`
+    : 'Your 7-day free trial has ended.';
+  $('buyBtn').textContent = ent.price ? `UNLOCK — ${ent.price}` : 'UNLOCK';
+  $('buyBtn').disabled = false;
+  $('unlockMsg').textContent = msg;
+}
+function showUnlock() {
+  renderUnlock();
+  if (openSheet) swapSheet('unlock'); else showSheet('unlock');
+}
+
+$('buyBtn').addEventListener('click', async () => {
+  if (!Billing) { renderUnlock('Purchases work in the Android app installed from Google Play.'); return; }
+  $('buyBtn').disabled = true;
+  $('unlockMsg').textContent = '';
+  try {
+    const r = await Billing.purchase();
+    if (r.purchased) {
+      ent.purchased = true;
+      await entStore.save();
+      renderUnlock('Unlocked — thank you!');
+      $('buyBtn').disabled = true;
+      setTimeout(() => { if (openSheet && openSheet.id === 'unlock') hideSheet(); }, 1200);
+    } else if (r.pending) {
+      renderUnlock('Payment pending — Repeat unlocks as soon as it completes.');
+    } else if (r.cancelled) {
+      renderUnlock();
+    } else {
+      renderUnlock(r.error || 'Purchase did not complete.');
+    }
+  } catch (e) {
+    renderUnlock('Purchase did not complete.');
+  }
+});
+
+$('restoreBtn').addEventListener('click', async () => {
+  if (!Billing) { renderUnlock('Purchases work in the Android app installed from Google Play.'); return; }
+  $('unlockMsg').textContent = 'Checking…';
+  await refreshLicense();
+  renderUnlock(ent.purchased ? 'Purchase restored — thank you!' : 'No purchase found for this Google account.');
+  if (ent.purchased) setTimeout(() => { if (openSheet && openSheet.id === 'unlock') hideSheet(); }, 1200);
+});
+
+$('licenseBtn').addEventListener('click', () => showUnlock());
+
+$('dbgExpire').addEventListener('click', async () => {
+  ent.trialStart = Date.now() - (TRIAL_DAYS + 1) * DAY; ent.purchased = false;
+  await entStore.save(); enforceLicense(); renderSettings();
+});
+$('dbgReset').addEventListener('click', async () => {
+  ent.trialStart = Date.now();
+  await entStore.save(); renderSettings();
+});
+
 /* ---------- Events ---------- */
 $('startBtn').addEventListener('click', () => {
   (state === 'work' || state === 'rest') ? stop() : start();
 });
 
 $('repeatBtn').addEventListener('click', () => {
+  if (!settings.repeat && !unlocked()) { showUnlock(); return; }
   // Allowed mid-run: turning it off lets the current round finish and stop.
   settings.repeat = !settings.repeat;
   save();
@@ -297,13 +411,18 @@ document.addEventListener('visibilitychange', async () => {
   if (document.hidden) return;
   if (Native) adopt(await Native.getState());
   tick();
+  refreshLicense();
 });
 
 /* ---------- Boot ---------- */
 (async () => {
   const saved = await store.load();
   if (saved) settings = { ...DEFAULTS, ...saved };
-  render();
+  const savedEnt = await entStore.load();
+  if (savedEnt) ent = { ...ent, ...savedEnt };
+  if (!ent.trialStart) { ent.trialStart = Date.now(); await entStore.save(); }
+  enforceLicense();
   if (Native) adopt(await Native.getState()); // timer may still be running from before
+  refreshLicense();
 
 })();
