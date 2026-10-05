@@ -274,7 +274,7 @@ function renderSettings() {
   const left = trialDaysLeft();
   $('licenseText').textContent = ent.purchased ? 'Unlocked — thank you!'
     : left > 0 ? `Free trial · ${left} day${left === 1 ? '' : 's'} left`
-    : 'Trial ended — Repeat is locked';
+    : 'Trial ended — Repeat & Restart locked';
   $('licenseBtn').hidden = ent.purchased;
   $('debugRow').hidden = !devBuild;
 }

@@ -13,6 +13,7 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
+import com.android.billingclient.api.UnfetchedProduct;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -34,6 +35,8 @@ public class BillingPlugin extends Plugin implements PurchasesUpdatedListener {
     private BillingClient client;
     private ProductDetails product;
     private PluginCall pendingPurchase;
+    /** Why the product couldn't be loaded, in Google's own terms (shown on the Unlock screen). */
+    private String productError = "unknown";
 
     @Override
     public void load() {
@@ -128,9 +131,25 @@ public class BillingPlugin extends Plugin implements PurchasesUpdatedListener {
                                 .build()))
                 .build();
         client.queryProductDetailsAsync(params, (r, result) -> {
-            if (r.getResponseCode() == BillingClient.BillingResponseCode.OK && result != null) {
+            if (r.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                productError = "Play response " + r.getResponseCode() + " " + r.getDebugMessage();
+            } else if (result != null) {
                 List<ProductDetails> list = result.getProductDetailsList();
-                if (list != null && !list.isEmpty()) product = list.get(0);
+                if (list != null && !list.isEmpty()) {
+                    product = list.get(0);
+                } else {
+                    List<UnfetchedProduct> missing = result.getUnfetchedProductList();
+                    if (missing != null && !missing.isEmpty()) {
+                        int sc = missing.get(0).getStatusCode();
+                        String name = sc == UnfetchedProduct.StatusCode.PRODUCT_NOT_FOUND ? "PRODUCT_NOT_FOUND"
+                                : sc == UnfetchedProduct.StatusCode.NO_ELIGIBLE_OFFER ? "NO_ELIGIBLE_OFFER"
+                                : sc == UnfetchedProduct.StatusCode.INVALID_PRODUCT_ID_FORMAT ? "INVALID_PRODUCT_ID_FORMAT"
+                                : "UNKNOWN";
+                        productError = "unfetched " + name + " (" + sc + ")";
+                    } else {
+                        productError = "empty result";
+                    }
+                }
             }
             then.run();
         });
@@ -151,7 +170,7 @@ public class BillingPlugin extends Plugin implements PurchasesUpdatedListener {
             if (product == null) {
                 JSObject o = new JSObject();
                 o.put("purchased", false);
-                o.put("error", "Product not available yet. (Is the app installed from a Play testing track?)");
+                o.put("error", "Product not available: " + productError + " [" + getContext().getPackageName() + "]");
                 call.resolve(o);
                 return;
             }
