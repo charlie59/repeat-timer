@@ -253,9 +253,8 @@ function render() {
   $('startBtn').textContent = running ? 'STOP' : 'START';
   $('repeatBtn').setAttribute('aria-pressed', String(settings.repeat));
   $('repeatLabel').textContent = settings.repeat ? 'REPEAT ON' : 'REPEAT OFF';
-  // Restart: shown whenever Repeat is on (so the row never shifts mid-session), usable only during a round.
-  $('restartBtn').hidden = !settings.repeat;
-  $('restartBtn').disabled = state !== 'work';
+  // Restart: always visible (fixed layout); usable only during a round with Repeat on.
+  $('restartBtn').disabled = !(settings.repeat && state === 'work');
 }
 
 function renderPicker() {
