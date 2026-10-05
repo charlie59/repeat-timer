@@ -85,12 +85,14 @@ public class TimerService extends Service {
         String st = intent.getStringExtra("soundType");
         soundType = st != null ? st : "bowl";
         phaseEnd = intent.getLongExtra("phaseEnd", System.currentTimeMillis() + durationMs);
-        round = 1;
-        state = "work";
+        boolean leadIn = intent.getBooleanExtra("leadIn", false) && restMs > 0;
+        // Lead-in: count down the rest gap first (round 0); round 1 then starts with the resume cue.
+        round = leadIn ? 0 : 1;
+        state = leadIn ? "rest" : "work";
 
         goForeground();
         acquireWakeLock();
-        cue("start");
+        if (!leadIn) cue("start");
         schedule();
         emit();
         return START_NOT_STICKY;
@@ -103,6 +105,16 @@ public class TimerService extends Service {
         this.soundType = soundType;
         this.vibrate = vibrate;
         if (running()) { updateNotification(); emit(); }
+    }
+
+    /** Restart the current round from full time; ignored outside a round. */
+    void restartRound(long newPhaseEnd) {
+        if (!"work".equals(state)) return;
+        phaseEnd = newPhaseEnd > 0 ? newPhaseEnd : System.currentTimeMillis() + durationMs;
+        cue("start");
+        schedule();
+        updateNotification();
+        emit();
     }
 
     void stopTimer() {
@@ -199,7 +211,7 @@ public class TimerService extends Service {
         Intent stop = new Intent(this, TimerService.class).setAction(ACTION_STOP);
         PendingIntent stopPi = PendingIntent.getService(this, 1, stop, piFlags);
 
-        String title = "rest".equals(state) ? "Resting" : (repeat ? "Round " + round : "Timer running");
+        String title = "rest".equals(state) ? (round == 0 ? "Get ready" : "Resting") : (repeat ? "Round " + round : "Timer running");
         return new NotificationCompat.Builder(this, CHANNEL)
                 .setSmallIcon(R.drawable.ic_stat_timer)
                 .setContentTitle(title)

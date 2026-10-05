@@ -33,7 +33,7 @@ button {
   gap: 14px;
 }
 
-header { display: flex; justify-content: space-between; align-items: center; min-height: 48px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; }
 #round { font-size: 26px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
 .icon { width: 52px; height: 52px; display: grid; place-items: center; color: var(--muted); border-radius: 50%; }
 .icon:active { background: var(--panel); }
@@ -56,10 +56,10 @@ body.rest #time, body.rest #phase { color: var(--rest); }
 body.done #phase { color: var(--go); }
 
 #controls { display: flex; flex-direction: column; gap: 14px; }
-#repeatBtn {
-  height: 84px; border-radius: 22px; border: 3px solid var(--line);
-  display: flex; align-items: center; justify-content: center; gap: 14px;
-  font-size: 28px; font-weight: 800; letter-spacing: .06em; color: var(--muted);
+#repeatBtn, #restartBtn {
+  flex: 1; height: 72px; border-radius: 22px; border: 3px solid var(--line);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 22px; font-weight: 800; letter-spacing: .06em; color: var(--muted);
 }
 #repeatBtn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: rgba(63,169,245,.12); }
 #startBtn {
@@ -121,3 +121,12 @@ body.work #startBtn, body.rest #startBtn { background: var(--stop); }
 .debugBtns { display: flex; gap: 8px; }
 .debugBtns .toggle { width: 96px; font-size: 16px; }
 #licenseBtn { background: var(--go); color: #fff; }
+#restartBtn[hidden] { display: none; }
+#restartBtn { border-color: var(--fg); color: var(--fg); }
+#restartBtn:disabled { opacity: .3; }
+#restartBtn:not(:disabled):active { transform: scale(.98); background: var(--panel); }
+/* Repeat + Restart share the top row: keep labels on one line */
+#repeatBtn, #restartBtn { white-space: nowrap; font-size: clamp(14px, 4.4vw, 19px); letter-spacing: 0; gap: 6px; padding: 0 6px; min-width: 0; }
+header { gap: 8px; }
+#restartBtn { flex: 0.85; }
+#repeatBtn svg, #restartBtn svg { width: clamp(18px, 5.5vw, 24px); height: clamp(18px, 5.5vw, 24px); flex-shrink: 0; }

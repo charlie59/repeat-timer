@@ -137,7 +137,7 @@ function enforceLicense() {
 }
 
 /* ---------- Settings ---------- */
-const DEFAULTS = { duration: 180, repeat: false, rest: 5, sound: true, soundType: 'bowl', vibrate: true };
+const DEFAULTS = { duration: 180, repeat: false, rest: 5, sound: true, soundType: 'bowl', vibrate: true, leadIn: false };
 let settings = { ...DEFAULTS };
 const save = () => store.save(settings);
 
@@ -152,18 +152,34 @@ const now = () => Date.now();
 
 function start() {
   audio(); // unlock audio on user gesture
-  round = 1;
-  state = 'work';
-  phaseEnd = now() + settings.duration * 1000;
+  const lead = settings.leadIn && settings.rest > 0;
+  // Lead-in: count down the rest gap first (round 0), then round 1 starts with the resume cue.
+  round = lead ? 0 : 1;
+  state = lead ? 'rest' : 'work';
+  phaseEnd = now() + (lead ? settings.rest : settings.duration) * 1000;
   if (Native) {
-    Native.start({ ...nativeOpts(), phaseEnd });
+    Native.start({ ...nativeOpts(), phaseEnd, leadIn: lead });
   } else {
-    play('start');
+    if (!lead) play('start');
     vibrate(150);
   }
   keepAwake(true);
   clearInterval(ticker);
   ticker = setInterval(tick, 100);
+  render();
+}
+
+// Start the current round again from full time (round number unchanged). No-op outside a round.
+function restartRound() {
+  if (state !== 'work') return;
+  if (!unlocked()) { showUnlock(); return; }   // full-version feature, like Repeat
+  phaseEnd = now() + settings.duration * 1000;
+  if (Native) {
+    Native.restartRound({ phaseEnd });
+  } else {
+    play('start');
+    vibrate(150);
+  }
   render();
 }
 
@@ -229,11 +245,17 @@ function render() {
   const secs = running ? Math.max(0, Math.ceil((phaseEnd - now()) / 1000)) : settings.duration;
   $('time').textContent = fmt(secs);
   $('time').classList.toggle('long', secs >= 600);
-  $('phase').textContent = { idle: 'READY', work: '\u00a0', rest: 'RESTING', done: 'DONE' }[state];
-  $('round').textContent = running && settings.repeat ? `ROUND ${round}` : (state === 'done' && round > 1 ? `${round} ROUNDS` : '');
+  $('phase').textContent =
+      state === 'idle' ? 'READY'
+    : state === 'rest' ? (round === 0 ? 'GET READY' : 'RESTING')
+    : state === 'work' ? (settings.repeat ? `ROUND ${round}` : '\u00a0')
+    : (round > 1 ? `DONE · ${round} ROUNDS` : 'DONE');
   $('startBtn').textContent = running ? 'STOP' : 'START';
   $('repeatBtn').setAttribute('aria-pressed', String(settings.repeat));
   $('repeatLabel').textContent = settings.repeat ? 'REPEAT ON' : 'REPEAT OFF';
+  // Restart: shown whenever Repeat is on (so the row never shifts mid-session), usable only during a round.
+  $('restartBtn').hidden = !settings.repeat;
+  $('restartBtn').disabled = state !== 'work';
 }
 
 function renderPicker() {
@@ -242,6 +264,8 @@ function renderPicker() {
 
 function renderSettings() {
   $('restValue').textContent = `${settings.rest} s`;
+  $('leadInToggle').setAttribute('aria-pressed', String(settings.leadIn));
+  $('leadInToggle').textContent = settings.leadIn ? 'ON' : 'OFF';
   $('soundToggle').setAttribute('aria-pressed', String(settings.sound));
   $('soundToggle').textContent = settings.sound ? 'ON' : 'OFF';
   $('vibrateToggle').setAttribute('aria-pressed', String(settings.vibrate));
@@ -343,6 +367,8 @@ $('startBtn').addEventListener('click', () => {
   (state === 'work' || state === 'rest') ? stop() : start();
 });
 
+$('restartBtn').addEventListener('click', restartRound);
+
 $('repeatBtn').addEventListener('click', () => {
   if (!settings.repeat && !unlocked()) { showUnlock(); return; }
   // Allowed mid-run: turning it off lets the current round finish and stop.
@@ -374,6 +400,7 @@ document.querySelectorAll('[data-rest]').forEach((b) => b.addEventListener('clic
   settings.rest = Math.min(60, Math.max(0, settings.rest + Number(b.dataset.rest)));
   renderSettings();
 }));
+$('leadInToggle').addEventListener('click', () => { settings.leadIn = !settings.leadIn; renderSettings(); });
 $('soundToggle').addEventListener('click', () => { settings.sound = !settings.sound; renderSettings(); });
 $('vibrateToggle').addEventListener('click', () => { settings.vibrate = !settings.vibrate; renderSettings(); });
 document.querySelectorAll('#soundType button').forEach((b) => b.addEventListener('click', () => {
