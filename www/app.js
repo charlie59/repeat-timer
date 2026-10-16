@@ -94,6 +94,9 @@ function play(kind, force = false) {
 
 /* ---------- Trial + purchase ---------- */
 const Billing = P.Billing || null;
+// iOS: the trial starts when the user claims Apple's free "7-day trial" item (App Store rule),
+// not automatically on first launch as on Android.
+const IOS = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'ios');
 const TRIAL_DAYS = 7;
 const DAY = 24 * 60 * 60 * 1000;
 let ent = { trialStart: 0, purchased: false, price: null };
@@ -111,8 +114,9 @@ const entStore = {
     try { P.Preferences ? await P.Preferences.set({ key: 'ent', value: v }) : localStorage.setItem('ent', v); } catch (e) {}
   },
 };
-const trialDaysLeft = () => Math.max(0, Math.ceil((ent.trialStart + TRIAL_DAYS * DAY - Date.now()) / DAY));
+const trialDaysLeft = () => (ent.trialStart ? Math.max(0, Math.ceil((ent.trialStart + TRIAL_DAYS * DAY - Date.now()) / DAY)) : 0);
 const unlocked = () => ent.purchased || trialDaysLeft() > 0;
+const trialAvailable = () => IOS && !ent.trialStart && !ent.purchased;
 
 // Ask Play what this Google account owns. Offline / not-installed-from-Play keeps the cached answer.
 async function refreshLicense() {
@@ -122,6 +126,7 @@ async function refreshLicense() {
     devBuild = !!st.debug;
     if (st.price) ent.price = st.price;
     if (st.known) ent.purchased = !!st.purchased;
+    if (st.trialRequired) ent.trialStart = st.trialStart || 0;
     await entStore.save();
   } catch (e) {}
   enforceLicense();
@@ -273,6 +278,7 @@ function renderSettings() {
     b.setAttribute('aria-pressed', String(b.dataset.sound === settings.soundType)));
   const left = trialDaysLeft();
   $('licenseText').textContent = ent.purchased ? 'Unlocked — thank you!'
+    : trialAvailable() ? 'Free 7-day trial available'
     : left > 0 ? `Free trial · ${left} day${left === 1 ? '' : 's'} left`
     : 'Trial ended — Repeat & Restart locked';
   $('licenseBtn').hidden = ent.purchased;
@@ -306,9 +312,13 @@ function swapSheet(id) {
 }
 
 function renderUnlock(msg = '') {
-  $('unlockLead').textContent = trialDaysLeft() > 0
+  $('unlockLead').textContent = trialAvailable()
+    ? 'Try Repeat & Restart free for 7 days.'
+    : trialDaysLeft() > 0
     ? `Free trial: ${trialDaysLeft()} day${trialDaysLeft() === 1 ? '' : 's'} left.`
     : 'Your 7-day free trial has ended.';
+  $('trialBtn').hidden = !trialAvailable();
+  $('trialBtn').disabled = false;
   $('buyBtn').textContent = ent.price ? `UNLOCK — ${ent.price}` : 'UNLOCK';
   $('buyBtn').disabled = false;
   $('unlockMsg').textContent = msg;
@@ -319,7 +329,7 @@ function showUnlock() {
 }
 
 $('buyBtn').addEventListener('click', async () => {
-  if (!Billing) { renderUnlock('Purchases work in the Android app installed from Google Play.'); return; }
+  if (!Billing) { renderUnlock('Purchases work in the app installed from the store.'); return; }
   $('buyBtn').disabled = true;
   $('unlockMsg').textContent = '';
   try {
@@ -342,11 +352,34 @@ $('buyBtn').addEventListener('click', async () => {
   }
 });
 
+$('trialBtn').addEventListener('click', async () => {
+  if (!Billing || !Billing.startTrial) return;
+  $('trialBtn').disabled = true;
+  $('unlockMsg').textContent = '';
+  try {
+    const r = await Billing.startTrial();
+    if (r.started) {
+      ent.trialStart = r.trialStart || Date.now();
+      await entStore.save();
+      enforceLicense();
+      renderUnlock('Your 7-day free trial has started — enjoy!');
+      $('trialBtn').hidden = true;
+      setTimeout(() => { if (openSheet && openSheet.id === 'unlock') hideSheet(); }, 1400);
+    } else {
+      renderUnlock(r.cancelled ? '' : (r.error || 'Could not start the trial.'));
+    }
+  } catch (e) {
+    renderUnlock('Could not start the trial.');
+  }
+});
+
 $('restoreBtn').addEventListener('click', async () => {
-  if (!Billing) { renderUnlock('Purchases work in the Android app installed from Google Play.'); return; }
+  if (!Billing) { renderUnlock('Purchases work in the app installed from the store.'); return; }
   $('unlockMsg').textContent = 'Checking…';
+  if (Billing.restore) { try { await Billing.restore(); } catch (e) {} }
   await refreshLicense();
-  renderUnlock(ent.purchased ? 'Purchase restored — thank you!' : 'No purchase found for this Google account.');
+  renderUnlock(ent.purchased ? 'Purchase restored — thank you!'
+    : `No purchase found for this ${IOS ? 'Apple' : 'Google'} account.`);
   if (ent.purchased) setTimeout(() => { if (openSheet && openSheet.id === 'unlock') hideSheet(); }, 1200);
 });
 
@@ -446,7 +479,7 @@ document.addEventListener('visibilitychange', async () => {
   if (saved) settings = { ...DEFAULTS, ...saved };
   const savedEnt = await entStore.load();
   if (savedEnt) ent = { ...ent, ...savedEnt };
-  if (!ent.trialStart) { ent.trialStart = Date.now(); await entStore.save(); }
+  if (!ent.trialStart && !IOS) { ent.trialStart = Date.now(); await entStore.save(); }
   enforceLicense();
   if (Native) adopt(await Native.getState()); // timer may still be running from before
   refreshLicense();

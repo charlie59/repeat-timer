@@ -130,3 +130,5 @@ body.work #startBtn, body.rest #startBtn { background: var(--stop); }
 header { gap: 8px; }
 #restartBtn { flex: 0.85; }
 #repeatBtn svg, #restartBtn svg { width: clamp(18px, 5.5vw, 24px); height: clamp(18px, 5.5vw, 24px); flex-shrink: 0; }
+.buy.trial { background: var(--accent); color: #000; }
+.buy[hidden] { display: none; }
