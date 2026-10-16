@@ -36,6 +36,7 @@
 		A1C0FFEE0000000000000001 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		A1C0FFEE0000000000000002 /* TimerPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPlugin.swift; sourceTree = "<group>"; };
 		A1C0FFEE0000000000000003 /* BillingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillingPlugin.swift; sourceTree = "<group>"; };
+		CB217DEE30829318005A5100 /* Yoga & Egg TimerProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Yoga & Egg TimerProducts.storekit"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +54,7 @@
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
+				CB217DEE30829318005A5100 /* Yoga & Egg TimerProducts.storekit */,
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
