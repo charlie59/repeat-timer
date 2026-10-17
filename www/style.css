@@ -10,6 +10,8 @@
   --rest: #f2b233;
   --accent: #3fa9f5;
 }
+/* The hidden attribute must always win over display rules like .row { display:flex } */
+[hidden] { display: none !important; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; margin: 0; }
 body {
@@ -100,7 +102,7 @@ body.work #startBtn, body.rest #startBtn { background: var(--stop); }
 .chips button { height: 72px; border-radius: 18px; background: var(--panel); font-size: 30px; font-weight: 800; }
 .chips button:active { background: var(--line); }
 .chipsLabel { text-align: center; color: var(--muted); margin-top: -12px; }
-.done { margin-top: auto; height: 84px; border-radius: 22px; background: var(--accent); color: #000; font-size: 30px; font-weight: 900; letter-spacing: .08em; flex-shrink: 0; }
+.sheet .done { margin-top: auto; height: 84px; border-radius: 22px; background: var(--accent); color: #000; font-size: 30px; font-weight: 900; letter-spacing: .08em; flex-shrink: 0; }
 
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .row.column { flex-direction: column; align-items: stretch; }

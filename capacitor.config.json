@@ -1,5 +1,6 @@
 {
   "appId": "com.texitservicesllc.repeattimer",
   "appName": "Yoga & Egg Timer",
-  "webDir": "www"
+  "webDir": "www",
+  "backgroundColor": "#000000"
 }
