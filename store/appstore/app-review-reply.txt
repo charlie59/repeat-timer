@@ -1,0 +1,11 @@
+1. Screen recording: attached (two recordings combined into one video; Recording 2 starts at 4:10). Recorded on a physical iPhone 18 Pro running iOS 27 via TestFlight, through a remote real-device lab (we do not own an iPhone). Recording 1 starts by launching the app from TestFlight and shows setting a time, a full countdown, starting the free trial (trial_7day), Repeat with the rest gap across several rounds, Restart, Settings, and the $2.99 unlock purchase sheet (unlock_full). Recording 2 (build 1.0 (3), the build submitted) shows the free trial being started on a fresh device, Repeat rounds with the rest gap, Restart, and Settings. Recording 1 used an earlier build that showed a developer-only Debug row in Settings; it is removed in 1.0 (3). The remote lab does not transmit device audio or allow backgrounding, so the cue sounds and locked-screen cue notifications are not audible or visible in the recordings.
+
+2. Purpose and audience: Yoga & Egg Timer is a simple interval timer with very large numbers and buttons, readable from a yoga mat or across a kitchen. Its main audience is Kundalini yoga practitioners, whose kriyas repeat the same timed interval several times with a short rest in between; existing timers make this fiddly. REPEAT cycles one interval with a configurable rest gap, RESTART restarts the current round, and cue sounds play even with the screen locked. It is equally useful as a plain kitchen timer.
+
+3. Setup and access: No account, login, or sample files. Launch the app, tap the time to set it, and tap START. Tap REPEAT to use repeating rounds; this opens the unlock sheet, where START FREE TRIAL begins a 7-day trial (trial_7day, $0 non-consumable) and UNLOCK buys the full version once (unlock_full, $2.99). Restore purchase is on the same sheet. Allow notifications so cue sounds play while the screen is locked (they are scheduled local notifications).
+
+4. External services: Apple In-App Purchase (StoreKit 2) for the trial and unlock. Apple UserNotifications for on-device local notifications. No servers, analytics, advertising, AI services, or third-party SDKs; no data is collected or transmitted.
+
+5. Regional differences: None. The app works identically in all regions; only the App Store price is localized by Apple.
+
+6. Regulated industry / third-party material: Not applicable. All sounds and artwork are our own.

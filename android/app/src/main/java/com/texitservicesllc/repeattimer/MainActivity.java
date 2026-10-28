@@ -16,6 +16,9 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(TimerPlugin.class);
         registerPlugin(BillingPlugin.class);
         super.onCreate(savedInstanceState);
+        // Cap system font scaling so large-font phones don't push the buttons off screen.
+        int zoom = Math.min(Math.round(getResources().getConfiguration().fontScale * 100), 115);
+        getBridge().getWebView().getSettings().setTextZoom(zoom);
         // Needed to show the running-timer notification (Android 13+).
         if (Build.VERSION.SDK_INT >= 33 &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
