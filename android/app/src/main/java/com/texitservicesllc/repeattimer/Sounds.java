@@ -7,7 +7,7 @@ import android.media.SoundPool;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Preloaded cue sounds on the alarm stream (plays in silent mode, mixes over music). */
+/** Preloaded cue sounds on the media stream (volume keys control it, plays in silent mode, mixes over music). */
 final class Sounds {
     private static SoundPool pool;
     private static final Map<String, Integer> ids = new HashMap<>();
@@ -18,7 +18,7 @@ final class Sounds {
         if (pool != null) return;
         Context c = ctx.getApplicationContext();
         AudioAttributes attrs = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build();
         pool = new SoundPool.Builder().setMaxStreams(4).setAudioAttributes(attrs).build();
