@@ -25,4 +25,11 @@ public class MainActivity extends BridgeActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
         }
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Settings may have changed (e.g. duration); show them on the idle widget.
+        TimerWidget.refresh(this);
+    }
 }

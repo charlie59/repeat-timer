@@ -29,6 +29,7 @@ import com.getcapacitor.JSObject;
 public class TimerService extends Service {
     static final String ACTION_START = "com.texitservicesllc.repeattimer.START";
     static final String ACTION_STOP = "com.texitservicesllc.repeattimer.STOP";
+    static final String ACTION_WIDGET_START = "com.texitservicesllc.repeattimer.WIDGET_START";
     private static final String CHANNEL = "timer";
     private static final int NOTIF_ID = 1;
 
@@ -76,6 +77,11 @@ public class TimerService extends Service {
             return START_NOT_STICKY;
         }
         if (intent == null) { stopSelf(); return START_NOT_STICKY; }
+        if (ACTION_WIDGET_START.equals(intent.getAction())) {
+            // Already running: ignore, but startForegroundService still requires a startForeground call.
+            if (running()) { goForeground(); return START_NOT_STICKY; }
+            intent = TimerWidget.startIntent(this);
+        }
 
         durationMs = intent.getLongExtra("durationMs", 180000);
         restMs = intent.getLongExtra("restMs", 5000);
@@ -182,8 +188,10 @@ public class TimerService extends Service {
         o.put("state", state);
         o.put("phaseEnd", phaseEnd);
         o.put("round", round);
+        o.put("repeat", repeat);
         last = o;
         if (listener != null) listener.onState(o);
+        TimerWidget.refresh(this);
     }
 
     // ---------- foreground notification ----------
