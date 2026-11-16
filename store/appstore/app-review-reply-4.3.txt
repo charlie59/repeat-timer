@@ -1,0 +1,20 @@
+Hello, and thank you for the review.
+
+We'd like to ask you to reconsider the Guideline 4.3(a) decision. Yoga & Egg Timer is not a template or a repackaged app. We wrote it from scratch for one audience: Kundalini yoga practitioners. Their exercises (kriyas) repeat the same timed interval several times, with a short rest between rounds. General timer apps make this awkward. You have to re-enter the time for every round, or count rounds in your head with your eyes closed.
+
+What the app does that general timers don't:
+
+- REPEAT: one interval runs again and again, with a rest gap you choose. The app counts the rounds for you.
+- RESTART: starts the current round again from full time, without losing the round count.
+- Lead-in: an optional "get ready" countdown before round 1, so you can settle on the mat.
+- Three sets of cue sounds (singing bowl, chime, beep). Each set has different sounds for round start, round end, and the end of a rest, so you can follow along with your eyes closed.
+- Cues still play with the screen locked.
+- Very large numbers and buttons that you can read and tap from a yoga mat.
+
+The source code, sounds, and artwork are all our own. We have not submitted any other timer app, and this app is not published under any other developer account. There are no ads, no account, and no data collection.
+
+The app is also useful as a plain kitchen timer, which is why "Egg Timer" is in the name. If the name is part of the concern, we are happy to change it.
+
+If it would help, we can send a new screen recording of a full Repeat session, with rest gaps and cue sounds.
+
+Thank you.
