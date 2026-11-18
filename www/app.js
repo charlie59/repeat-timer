@@ -238,6 +238,7 @@ function tick() {
 
 /* ---------- Rendering ---------- */
 const $ = (id) => document.getElementById(id);
+if (IOS) $('appVersion').textContent = '1.1'; // iOS numbers its versions separately (MARKETING_VERSION in Xcode)
 const fmt = (s) => {
   const m = Math.floor(s / 60);
   const sec = s % 60;

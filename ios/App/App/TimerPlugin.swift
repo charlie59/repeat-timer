@@ -3,6 +3,7 @@ import Capacitor
 import UserNotifications
 import AVFoundation
 import AudioToolbox
+import WidgetKit
 
 /// iOS counterpart of the Android TimerService.
 /// iOS won't keep an app running in the background, so every upcoming cue is
@@ -240,6 +241,23 @@ public class TimerPlugin: CAPPlugin, CAPBridgedPlugin, UNUserNotificationCenterD
             "durationMs": durationMs, "restMs": restMs, "repeat": repeatOn,
             "sound": sound, "vibrate": vibrate, "soundType": soundType,
         ] as [String: Any], forKey: stateKey)
+        publishWidget()
+    }
+
+    /// Hand the widget every upcoming phase; WidgetKit steps through them while the app is suspended.
+    private func publishWidget() {
+        var phases: [[String: Any]] = []
+        var p = Phase(state: state, phaseEnd: phaseEnd, round: round)
+        var start = now()
+        while (p.state == "work" || p.state == "rest") && phases.count < maxScheduled {
+            phases.append(["state": p.state, "round": p.round, "start": start, "end": p.phaseEnd])
+            start = p.phaseEnd
+            _ = step(&p)
+        }
+        UserDefaults(suiteName: "group.com.texitservicesllc.repeattimer")?.set([
+            "phases": phases, "after": p.state, "repeat": repeatOn, "durationMs": durationMs,
+        ] as [String: Any], forKey: "widget")
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     private func restoreState() {
